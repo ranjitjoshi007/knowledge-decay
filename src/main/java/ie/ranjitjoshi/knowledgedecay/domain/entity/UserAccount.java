@@ -1,5 +1,6 @@
 package ie.ranjitjoshi.knowledgedecay.domain.entity;
 
+import ie.ranjitjoshi.knowledgedecay.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,4 +19,8 @@ public class UserAccount {
 
     @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
+    private Role role;
 }

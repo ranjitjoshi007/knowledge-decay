@@ -1,6 +1,7 @@
 package ie.ranjitjoshi.knowledgedecay.controller;
 
 import ie.ranjitjoshi.knowledgedecay.domain.entity.UserAccount;
+import ie.ranjitjoshi.knowledgedecay.domain.enums.Role;
 import ie.ranjitjoshi.knowledgedecay.repository.UserAccountRepository;
 import ie.ranjitjoshi.knowledgedecay.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AuthController {
     @PostMapping("/register")
     public void register(@RequestBody UserAccount user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER); // default role
         userRepo.save(user);
     }
 
@@ -33,7 +35,7 @@ public class AuthController {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(),user.getRole().name());
         return Map.of("token", token);
     }
 
