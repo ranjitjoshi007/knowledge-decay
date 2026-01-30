@@ -2,13 +2,13 @@ package ie.ranjitjoshi.knowledgedecay.service;
 
 import ie.ranjitjoshi.knowledgedecay.domain.entity.KnowledgeItem;
 import ie.ranjitjoshi.knowledgedecay.domain.enums.KnowledgeStatus;
+import ie.ranjitjoshi.knowledgedecay.exception.ResourceNotFoundException;
 import ie.ranjitjoshi.knowledgedecay.repository.KnowledgeItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,16 +23,22 @@ public class KnowledgeItemService {
         item.setStatus(KnowledgeStatus.ACTIVE); // default
         return repository.save(item);
     }
-    public Optional<KnowledgeItem> getItemById(Long id) {
-        return repository.findById(id);
+    public KnowledgeItem getItemById(Long id) {
+        try {
+            repository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Knowledge item not found"));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Knowledge item not found"));
     }
     public void deleteItem(Long id) {
         repository.deleteById(id);
     }
     public KnowledgeItem create(KnowledgeItem item) {
         item.setStatus(KnowledgeStatus.ACTIVE);
-
-        // Auto-set lastReviewedAt if not provided
         if(item.getLastReviewedAt() == null){
             item.setLastReviewedAt(LocalDate.now());
         }

@@ -2,6 +2,9 @@ package ie.ranjitjoshi.knowledgedecay.controller;
 
 import ie.ranjitjoshi.knowledgedecay.domain.entity.KnowledgeItem;
 import ie.ranjitjoshi.knowledgedecay.domain.enums.KnowledgeStatus;
+import ie.ranjitjoshi.knowledgedecay.dto.request.CreateKnowledgeItemRequest;
+import ie.ranjitjoshi.knowledgedecay.dto.response.KnowledgeItemResponse;
+import ie.ranjitjoshi.knowledgedecay.mapper.KnowledgeItemMapper;
 import ie.ranjitjoshi.knowledgedecay.service.KnowledgeItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,18 +27,21 @@ public class KnowledgeItemController {
     }
 
     @PostMapping
-    public ResponseEntity<KnowledgeItem> createItem(@RequestBody KnowledgeItem item, Authentication auth) {
-        item.setOwnerEmail(auth.getName());
-        item.setLastReviewedAt(java.time.LocalDate.now());
-        item.setStatus(KnowledgeStatus.ACTIVE);
+    public ResponseEntity<KnowledgeItemResponse> createItem(@RequestBody CreateKnowledgeItemRequest request, Authentication auth) {
+        KnowledgeItem item =
+                KnowledgeItemMapper.toEntity(request, auth.getName());
+
+//        item.setOwnerEmail(auth.getName());
+//        item.setLastReviewedAt(java.time.LocalDate.now());
+//        item.setStatus(KnowledgeStatus.ACTIVE);
         KnowledgeItem saved = service.saveItem(item);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(KnowledgeItemMapper.toResponse(saved));
     }
     // Optional: mark as reviewed (updates lastReviewedAt)
     @PutMapping("/{id}")
     public ResponseEntity<KnowledgeItem> updateItem(@PathVariable Long id,@RequestBody KnowledgeItem updatedItem,                                                    Authentication auth) {
-        KnowledgeItem item = service.getItemById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+        KnowledgeItem item = service.getItemById(id);
+
 
         if (!item.getOwnerEmail().equals(auth.getName())) {
             throw new RuntimeException("You cannot update this item");
@@ -51,26 +57,21 @@ public class KnowledgeItemController {
         return ResponseEntity.ok(item);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<KnowledgeItem> getItem(@PathVariable Long id) {
-        KnowledgeItem item = service.getAllItems()
-                .stream()
-                .filter(k -> k.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Item not found"));
-        return ResponseEntity.ok(item);
+    public ResponseEntity<KnowledgeItemResponse> getItem(@PathVariable Long id) {
+        KnowledgeItem item = service.getItemById(id);
+
+        return ResponseEntity.ok(KnowledgeItemMapper.toResponse(item));
     }
     @DeleteMapping("/{id}")
     public boolean deleteItem(@PathVariable Long id) {
-        KnowledgeItem item = service.getItemById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+        KnowledgeItem item = service.getItemById(id);
         service.deleteItem(id);
         return true;
 
     }
     @PutMapping("/{id}/review")
     public ResponseEntity<KnowledgeItem> markAsReviewed(@PathVariable Long id, Authentication auth) {
-        KnowledgeItem item = service.getItemById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+        KnowledgeItem item = service.getItemById(id);
 
         if (!item.getOwnerEmail().equals(auth.getName())) {
             throw new RuntimeException("You cannot update this item");

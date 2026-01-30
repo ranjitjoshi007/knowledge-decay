@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface KnowledgeItemRepository extends JpaRepository<KnowledgeItem, Long> {
@@ -17,4 +18,8 @@ public interface KnowledgeItemRepository extends JpaRepository<KnowledgeItem, Lo
 
     // Find user-specific knowledge
     List<KnowledgeItem> findByOwnerEmail(String ownerEmail);
+
+    List<KnowledgeItem> findByUserEmail(String email);
+
+    Optional<KnowledgeItem> findByIdAndUserEmail(Long id, String email);
 }
