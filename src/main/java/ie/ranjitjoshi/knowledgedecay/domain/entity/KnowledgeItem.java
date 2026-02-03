@@ -1,5 +1,6 @@
 package ie.ranjitjoshi.knowledgedecay.domain.entity;
 
+import ie.ranjitjoshi.knowledgedecay.domain.Auditable;
 import ie.ranjitjoshi.knowledgedecay.domain.enums.KnowledgeStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KnowledgeItem {
+public class KnowledgeItem extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -4,21 +4,41 @@ import ie.ranjitjoshi.knowledgedecay.domain.entity.KnowledgeItem;
 import ie.ranjitjoshi.knowledgedecay.domain.enums.KnowledgeStatus;
 import ie.ranjitjoshi.knowledgedecay.exception.ResourceNotFoundException;
 import ie.ranjitjoshi.knowledgedecay.repository.KnowledgeItemRepository;
+import ie.ranjitjoshi.knowledgedecay.security.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 @RequiredArgsConstructor
 public class KnowledgeItemService {
     private final KnowledgeItemRepository repository;
+    private final SecurityService securityService;
 
     public List<KnowledgeItem> getAllItems() {
         return repository.findAll();
     }
+    public Page<KnowledgeItem> listForUser(Authentication auth, KnowledgeStatus status, Pageable pageable) {
+        boolean isAdmin = securityService.isAdmin(auth);
+        if (isAdmin && status != null) {
+            return repository.findByStatus(status, pageable);
+        }
 
+        if (isAdmin) {
+            return repository.findAll(pageable);
+        }
+
+        if (status != null) {
+            return repository.findByOwnerEmailAndStatus(auth.getName(), status, pageable);
+        }
+
+        return repository.findByOwnerEmail(auth.getName(), pageable);
+    }
     public KnowledgeItem saveItem(KnowledgeItem item) {
         item.setStatus(KnowledgeStatus.ACTIVE); // default
         return repository.save(item);

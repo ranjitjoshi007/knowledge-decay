@@ -21,6 +21,6 @@ public class UserAccount {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
+    @Column(nullable = false)//, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
     private Role role;
 }
